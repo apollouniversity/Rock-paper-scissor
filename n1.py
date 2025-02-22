@@ -1,13 +1,13 @@
 import tkinter as tk
 import random
 
-class congrats_:
+class Congrats:
     def __init__(self, root):
         self.root = root
         self.canvas = tk.Canvas(root, width=800, height=700, bg="#263238", highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
         
-        self.create_text_with_shadow("Congratulations.. You Win", 500, 300)
+        self.create_text_with_shadow("Congratulations.. You Win", 400, 300)
         
         self.colors = ["#fce18a", "#ff726d", "#b48def", "#f4306d"]
         self.create_congrats()
@@ -18,36 +18,35 @@ class congrats_:
             (20, 20, "#017e7f"), (25, 25, "#052939"), (30, 30, "#c11a2b")
         ]
         for dx, dy, color in text_shadow_effects:
-            self.canvas.create_text(x + dx, y + dy, text=text, font=("Helvetica", 60, "bold"), fill=color)
-        self.canvas.create_text(x, y, text=text, font=("Helvetica", 60, "bold"), fill="#fcedd8")
+            self.canvas.create_text(x + dx, y + dy, text=text, font=("Helvetica", 50, "bold"), fill=color)
+        self.canvas.create_text(x, y, text=text, font=("Helvetica", 50, "bold"), fill="#fcedd8")
     
     def create_congrats(self):
-        for _ in range(100):
+        for _ in range(50):
             size = random.randint(5, 15)
             x = random.randint(0, 800)
             y = -size
             color = random.choice(self.colors)
             speed = random.uniform(2, 6)
             self.animate_congrats(x, y, size, color, speed)
-    
+
     def animate_congrats(self, x, y, size, color, speed):
         if y < 700:
             congrats = self.canvas.create_oval(x, y, x + size, y + size, fill=color, outline="")
-            self.root.after(int(50 * speed), self.canvas.delete, congrats)
-            self.root.after(50, self.animate_congrats, x, y + speed * 3, size, color, speed)
+            self.root.after(int(50 * speed), lambda: self.canvas.delete(congrats))
+            self.root.after(50, lambda: self.animate_congrats(x, y + speed * 3, size, color, speed))
 
-class SadTheme_:
+class SadTheme:
     def __init__(self, root):
         self.root = root
         self.canvas = tk.Canvas(root, width=800, height=700, bg="#ff0000", highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
-        
-        self.create_message("      Sorry, You Lost the Game\n            All the Best for the Next Game", 400, 200)
+        self.create_message("Sorry, You Lost the Game\nAll the Best for the Next Game", 400, 200)
         self.sad_symbols = ["😢", "😭", "☹️", "😞"]
         self.create_sad_symbols()
-
+        
     def create_message(self, text, x, y):
-        self.canvas.create_text(x, y, text=text, font=("Courier", 50, "bold"), fill="#ffffff", justify="center")
+        self.canvas.create_text(x, y, text=text, font=("Courier", 40, "bold"), fill="white", justify="center")
 
     def create_sad_symbols(self):
         for _ in range(50):
@@ -59,38 +58,36 @@ class SadTheme_:
 
     def animate_symbol(self, x, y, symbol, size):
         symbol_id = self.canvas.create_text(x, y, text=symbol, font=("Courier", size, "bold"), fill="white")
-        self.canvas.after(1000, self.canvas.delete, symbol_id)
-
-class TieTheme_:
+        self.canvas.after(5000, self.canvas.delete, symbol_id)
+class TieTheme:
     def __init__(self, root):
         self.root = root
         self.canvas = tk.Canvas(root, width=800, height=700, bg="#d3d3d3", highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
-        
         self.create_message("It's a Tie!", 400, 200)
         self.create_handshake()
-
+    
     def create_message(self, text, x, y):
         self.canvas.create_text(x, y, text=text, font=("Helvetica", 50, "bold"), fill="#000000", justify="center")
 
     def create_handshake(self):
         self.canvas.create_text(400, 400, text="🤝", font=("Helvetica", 100), fill="#000000")
 
-def computer():
-    choices = ["Rock", "Paper", "Scissors"]
-    return random.choice(choices)
+def computer_choice():
+    return random.choice(["Rock", "Paper", "Scissors"])
 
-def winner(user, opponent):
-    if user == opponent:
+def determine_winner(user, computer):
+    if user == computer:
         return "It's a tie!"
-    elif (user == "Rock" and opponent == "Scissors") or \
-         (user == "Scissors" and opponent == "Paper") or \
-         (user == "Paper" and opponent == "Rock"):
+    elif (user == "Rock" and computer == "Scissors") or \
+         (user == "Scissors" and computer == "Paper") or \
+         (user == "Paper" and computer == "Rock"):
         return "You win!"
     else:
         return "Computer wins!"
 
 def play_game(user_choice):
+    
     button_rock.config(bg="gray")
     button_paper.config(bg="gray")
     button_scissors.config(bg="gray")
@@ -106,10 +103,12 @@ def play_game(user_choice):
     root.after(1000, reveal_result, user_choice)  
 
 def reveal_result(user_choice):
-    opponent = computer()
-    result = winner(user_choice, opponent)
+    comp_choice = computer_choice()
+    result = determine_winner(user_choice, comp_choice)
     
-    label_result.config(text=f"You chose: {emoji_map[user_choice]}\nComputer chose: {emoji_map[opponent]}\n\n{result}", fg="red", font=("Arial", 20, "bold"))
+    label_result.config(text=f"You: {emoji_map[user_choice]}  VS  Computer: {emoji_map[comp_choice]}\n{result}", 
+                        fg="red", font=("Arial", 20, "bold"))
+    
     update_stats(result)
 
     if result == "You win!":
@@ -127,16 +126,16 @@ def update_stats(result):
         computer_wins += 1
     else:
         ties += 1
-    
+
     label_user_wins.config(text=f"Your Wins: {user_wins}", font=("Arial", 16, "bold"))
     label_computer_wins.config(text=f"Computer Wins: {computer_wins}", font=("Arial", 16, "bold"))
     label_ties.config(text=f"Ties: {ties}", font=("Arial", 16, "bold"))
+    root.update_idletasks()
 
 def reset_stats():
     global user_wins, computer_wins, ties
-    user_wins = 0
-    computer_wins = 0
-    ties = 0
+    user_wins = computer_wins = ties = 0
+    
     label_user_wins.config(text=f"Your Wins: {user_wins}", font=("Arial", 16, "bold"))
     label_computer_wins.config(text=f"Computer Wins: {computer_wins}", font=("Arial", 16, "bold"))
     label_ties.config(text=f"Ties: {ties}", font=("Arial", 16, "bold"))
@@ -145,29 +144,25 @@ def show_congrats():
     congrats_window = tk.Toplevel(root)
     congrats_window.geometry("800x700")
     congrats_window.configure(bg="#263238")
-    congrats_(congrats_window)
+    Congrats(congrats_window)
 
 def show_sad_theme():
     sad_window = tk.Toplevel(root)
     sad_window.geometry("800x700")
     sad_window.configure(bg="#ff0000")
-    SadTheme_(sad_window)
+    SadTheme(sad_window)
 
 def show_tie_theme():
     tie_window = tk.Toplevel(root)
     tie_window.geometry("800x700")
     tie_window.configure(bg="#d3d3d3")
-    TieTheme_(tie_window)
+    TieTheme(tie_window)
 
 user_wins = 0
 computer_wins = 0
 ties = 0
 
-emoji_map = {
-    "Rock": "✊",
-    "Paper": "✋",
-    "Scissors": "✌️"
-}
+emoji_map = {"Rock": "✊", "Paper": "✋", "Scissors": "✌️"}
 
 root = tk.Tk()
 root.title("Rock, Paper, Scissors")
